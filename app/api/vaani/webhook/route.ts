@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   if (event === "call_ended" && callId) {
     await sql`
       insert into calls (vaani_call_id, duration_s, end_reason, ended_at)
-      values (${callId}, ${Number(body.call_duration ?? 0) || null}, ${String(body.end_reason ?? "") || null}, now())
+      values (${callId}, ${Number(data.call_duration ?? 0) || null}, ${String(data.end_reason ?? "") || null}, now())
       on conflict (vaani_call_id) do nothing`;
   }
 

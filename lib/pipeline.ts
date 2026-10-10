@@ -13,7 +13,8 @@ import { sendEmail } from "./email";
 
 export type PostCall = {
   call_id: string;
-  call_duration?: number; // ms in call_postprocessing
+  // Vaani's docs say milliseconds here, but live calls send seconds (146.4 for a 2.5-minute call).
+  call_duration?: number;
   end_reason?: string;
   summary?: string;
   entities?: Record<string, unknown> | null;
@@ -24,6 +25,8 @@ export type PostCall = {
 };
 
 const MERGE_WINDOW_MIN = 30;
+// Seconds as sent today; if Vaani ever switches to the documented milliseconds, still read it right.
+const toSeconds = (d: number | undefined | null) => (d == null ? null : d > 20000 ? d / 1000 : d);
 const str = (x: unknown) => (typeof x === "string" && x.trim() && !/^(null|n\/a|none|unknown)$/i.test(x.trim()) ? x.trim() : null);
 
 async function step<T>(name: string, ids: { enquiryId?: number | null; callId: number }, fn: () => Promise<T>): Promise<T | null> {
@@ -43,12 +46,13 @@ async function step<T>(name: string, ids: { enquiryId?: number | null; callId: n
 export async function processCall(p: PostCall): Promise<{ callRowId: number; outcome: string }> {
   // 1. Log row first, so the call exists even if everything below fails.
   const [row] = await sql<{ id: number; processing: string }[]>`
-    insert into calls (vaani_call_id, end_reason, summary, entities, dispositions, duration_s)
+    insert into calls (vaani_call_id, end_reason, summary, entities, dispositions, recording_url, duration_s)
     values (${p.call_id}, ${p.end_reason ?? null}, ${p.summary ?? null}, ${sql.json((p.entities ?? null) as never)},
-            ${sql.json((p.dispositions ?? null) as never)}, ${p.call_duration != null ? p.call_duration / 1000 : null})
+            ${sql.json((p.dispositions ?? null) as never)}, ${p.recording_url || null}, ${toSeconds(p.call_duration)})
     on conflict (vaani_call_id) do update set
       summary = coalesce(excluded.summary, calls.summary), entities = coalesce(excluded.entities, calls.entities),
-      dispositions = coalesce(excluded.dispositions, calls.dispositions), duration_s = coalesce(excluded.duration_s, calls.duration_s)
+      dispositions = coalesce(excluded.dispositions, calls.dispositions), recording_url = coalesce(excluded.recording_url, calls.recording_url),
+      duration_s = coalesce(excluded.duration_s, calls.duration_s)
     returning id, processing`;
   const callId = row.id;
   if (row.processing === "processed") return { callRowId: callId, outcome: "duplicate" };
@@ -84,7 +88,8 @@ async function run(p: PostCall, callId: number) {
   // duration × the per-minute rate on Vaani's billing page (env), and flag it as an estimate.
   let vaaniCost: number | null = hist?.call_cost ?? null;
   const rate = Number(process.env.VAANI_INR_PER_MIN);
-  if (vaaniCost == null && rate && p.call_duration) vaaniCost = Math.round((p.call_duration / 60000) * rate * 100) / 100;
+  const durS = toSeconds(p.call_duration);
+  if (vaaniCost == null && rate && durS) vaaniCost = Math.round((durS / 60) * rate * 100) / 100;
   const costEstimated = hist?.call_cost == null && vaaniCost != null;
 
   // 3. Verdict. The model never sees phone or email.

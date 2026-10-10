@@ -68,6 +68,9 @@ create table if not exists calls (
 );
 create index if not exists calls_created_idx on calls(created_at desc);
 
+-- Vaani's recording link carries its own signed token, so it streams without our API key.
+alter table calls add column if not exists recording_url text;
+
 -- Raw webhook bodies: the audit trail if anything downstream breaks.
 create table if not exists webhook_log (
   id          bigserial primary key,
