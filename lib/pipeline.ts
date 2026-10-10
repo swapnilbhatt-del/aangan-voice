@@ -74,7 +74,13 @@ async function run(p: PostCall, callId: number) {
   const ents = (p.entities ?? {}) as Record<string, unknown>;
 
   // 2. Cost, timing and caller number live in call history, not the webhook.
-  const hist = await step("vaani_history", { callId }, () => findCallInHistory(p.call_id));
+  // Vaani's call-history API currently errors for this account. That's a known provider issue with
+  // a working fallback (duration × rate, flagged cost_estimated), so it's logged but not flagged as
+  // an integration error on the call.
+  const hist = await findCallInHistory(p.call_id).catch((e) => {
+    console.warn("[vaani_history]", e instanceof Error ? e.message : e);
+    return null;
+  });
   const endedAt = hist?.End_time ? new Date(hist.End_time + (hist.End_time.endsWith("Z") ? "" : "Z")) : p.timestamp ? new Date(p.timestamp) : new Date();
   const startedAt = hist?.Start_time ? new Date(hist.Start_time + (hist.Start_time.endsWith("Z") ? "" : "Z")) : null;
   const afterHours = isAfterHours(startedAt ?? endedAt);
