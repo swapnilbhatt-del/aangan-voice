@@ -30,7 +30,7 @@ export async function GET(req: Request) {
   await check("telegram", () => tg("getMe", {}));
   await check("hubspot", () => hubspot.ping());
   await check("vaani", async () => {
-    const r = await fetch(`${process.env.VAANI_API_BASE || "https://api.vaanivoice.ai"}/api/call-history?page=1&page_size=1`, {
+    const r = await fetch(`${process.env.VAANI_API_BASE || "https://api.vaanivoice.ai"}/api/list-agents`, {
       headers: { "X-API-Key": process.env.VAANI_API_KEY ?? "" },
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
