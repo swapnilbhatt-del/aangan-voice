@@ -23,6 +23,9 @@ export type CallRow = {
   claimed_by: string | null;
   enquiry_outcome: string | null;
   priority: string | null;
+  criteria: Record<string, { status: string; evidence: string }> | null;
+  property: string | null;
+  handoff_sent_at: Date | null;
 };
 
 export async function listCalls(limit = 100) {
@@ -30,7 +33,8 @@ export async function listCalls(limit = 100) {
     select c.id, c.created_at, c.started_at, c.ended_at, c.duration_s::float, c.after_hours, c.outcome,
            c.failed_criteria, c.flags, c.price_leak, c.processing, c.vaani_cost_inr::float, c.llm_cost_inr::float,
            c.summary, c.enquiry_id, coalesce(c.verdict->'fields'->>'caller_first_name', p.name) as first_name,
-           coalesce(e.locality, c.verdict->'fields'->>'locality') as locality, e.claimed_by, e.outcome as enquiry_outcome, e.priority
+           coalesce(e.locality, c.verdict->'fields'->>'locality') as locality, e.claimed_by, e.outcome as enquiry_outcome, e.priority,
+           c.verdict->'criteria' as criteria, c.verdict->'fields'->>'property' as property, e.handoff_sent_at
     from calls c
     left join enquiries e on e.id = c.enquiry_id
     left join callers p on p.id = e.caller_id
@@ -89,13 +93,25 @@ export async function getStats() {
            count(*) filter (where status = 'qualified' and claimed_by is null and handoff_sent_at < now() - make_interval(mins => ${sla}))::int as unclaimed_late
     from enquiries`;
 
+  // The brief's promise: a qualified lead reaches a designer within 5 minutes of the call ending.
+  const [speed] = await sql<{ median_to_designer_s: number | null; max_to_designer_s: number | null; handed_off: number }[]>`
+    select (percentile_cont(0.5) within group (order by extract(epoch from e.handoff_sent_at - c.ended_at)))::float as median_to_designer_s,
+           max(extract(epoch from e.handoff_sent_at - c.ended_at))::float as max_to_designer_s,
+           count(*)::int as handed_off
+    from enquiries e
+    join lateral (select ended_at from calls where enquiry_id = e.id and ended_at is not null order by created_at limit 1) c on true
+    where e.handoff_sent_at is not null`;
+
   const sources = await sql<{ source: string; n: number }[]>`
     select coalesce(source, 'unknown') as source, count(*)::int as n from enquiries group by 1 order by 2 desc`;
   const localities = await sql<{ locality: string; n: number; qualified: number }[]>`
     select locality, count(*)::int as n, count(*) filter (where status = 'qualified')::int as qualified
     from enquiries where locality is not null group by 1 order by 2 desc limit 8`;
 
-  return { totals, declinedBy, byHour, funnel, sources, localities, avgValue, sla };
+  const health = await sql<{ service: string; ok: boolean; checked_at: Date }[]>`
+    select distinct on (service) service, ok, checked_at from health_checks order by service, checked_at desc`;
+
+  return { totals, declinedBy, byHour, funnel, sources, localities, avgValue, sla, speed, health };
 }
 
 export async function getAttention() {
