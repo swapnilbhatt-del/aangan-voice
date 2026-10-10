@@ -1,0 +1,32 @@
+{
+  "name": "aangan-voice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run db:setup && next build",
+    "start": "next start",
+    "db:setup": "tsx --env-file-if-exists=.env scripts/setup-db.ts",
+    "agent:sync": "tsx --env-file=.env scripts/vaani-agent.ts",
+    "telegram:setup": "tsx --env-file=.env scripts/telegram-setup.ts",
+    "hubspot:setup": "tsx --env-file=.env scripts/hubspot-setup.ts",
+    "eval": "tsx --env-file=.env scripts/eval.ts",
+    "simulate": "tsx --env-file=.env scripts/simulate-webhook.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "next": "^16.3.6",
+    "postgres": "^3.4.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "resend": "^6.30.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

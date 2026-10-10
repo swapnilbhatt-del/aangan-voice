@@ -1,0 +1,47 @@
+# Vaani Backend API
+
+- [Getting Started](https://docs.vaanivoice.ai/getting-started/overview.md): Set up Vaani from scratch and make your first outbound voice call in under 20 minutes
+- [Create an Account](https://docs.vaanivoice.ai/getting-started/create-account.md): Sign up for Vaani, set up your workspace, and get oriented in the dashboard
+- [Create an Agent](https://docs.vaanivoice.ai/getting-started/create-agent.md): Configure a voice agent with a prompt, voice, and metadata variables, then copy your agent_id
+- [Set Up Telephony](https://docs.vaanivoice.ai/getting-started/setup-telephony.md): Connect a phone number to your Vaani agent so it can make and receive real calls
+- [Generate an API Key](https://docs.vaanivoice.ai/getting-started/generate-api-key.md): Create, use, and manage API keys to authenticate your Vaani API requests
+- [Quickstart](https://docs.vaanivoice.ai/getting-started/quickstart.md): Trigger your first outbound call and verify it works end-to-end
+- [Concepts](https://docs.vaanivoice.ai/concepts.md): Key terms and concepts in the Vaani platform
+- [Python SDK](https://docs.vaanivoice.ai/sdk.md): Use the vaani-sdk Python package to trigger calls, manage agents, and run WebRTC voice sessions — both synchronous and async
+- [Webhook Setup](https://docs.vaanivoice.ai/guides/webhook-setup.md): Receive real-time call events from Vaani
+- [Start a Campaign](https://docs.vaanivoice.ai/guides/start-a-campaign.md): Run bulk outbound calls to a list of contacts
+- [Integrations](https://docs.vaanivoice.ai/guides/integrations.md): Connect Vaani with WhatsApp and Cal.com
+- [Call Logs & History](https://docs.vaanivoice.ai/guides/call-logs.md): Browse, filter, and download your call history
+- [Bring Your Own LLM (BYOL)](https://docs.vaanivoice.ai/guides/byol.md): Connect your own LLM to a Vaani agent via a streaming WebSocket server
+- [API Reference](https://docs.vaanivoice.ai/api-reference/introduction.md): Vaani Backend API — Agent Builder, Call Management, and WebRTC
+- [Create Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/create.md): Create a new outbound calling campaign with CSV contacts
+- [List Campaigns](https://docs.vaanivoice.ai/api-reference/campaigns/list.md): Get a paginated list of campaigns for your organization
+- [Get Campaign Status](https://docs.vaanivoice.ai/api-reference/campaigns/get-status.md): Get current status and progress for a campaign
+- [Get Campaign Results](https://docs.vaanivoice.ai/api-reference/campaigns/get-results.md): Get pre-signed download URL for campaign results CSV
+- [Update Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/update.md): Update campaign configuration (auto-pauses campaign)
+- [Start Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/start.md): Start a scheduled campaign
+- [Pause Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/pause.md): Temporarily pause an active campaign
+- [Resume Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/resume.md): Resume a paused campaign
+- [Stop Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/stop.md): Stop campaign at end of current day (soft stop)
+- [Cancel Campaign](https://docs.vaanivoice.ai/api-reference/campaigns/cancel.md): Immediately cancel a campaign (hard stop)
+- [Campaign Webhooks](https://docs.vaanivoice.ai/api-reference/campaigns/webhooks.md): Real-time notifications for campaign events and call completions
+- [Create Agent](https://docs.vaanivoice.ai/api-reference/create-agent.md): Create a new agent and associate it with your account
+- [List Agents](https://docs.vaanivoice.ai/api-reference/list-agents.md): List all agents associated with your organization
+- [Delete Agent](https://docs.vaanivoice.ai/api-reference/delete-agent.md): Permanently delete an agent from your account
+- [Update Persona](https://docs.vaanivoice.ai/api-reference/update-persona.md): Partially update the persona section of an agent
+- [Update Training](https://docs.vaanivoice.ai/api-reference/update-training.md): Partially update the training section of an agent
+- [Update Experience](https://docs.vaanivoice.ai/api-reference/update-experience.md): Partially update the experience section of an agent
+- [Update Analysis](https://docs.vaanivoice.ai/api-reference/update-analysis.md): Partially update the analysis section of an agent
+- [Update Deployment](https://docs.vaanivoice.ai/api-reference/update-deployment.md): Partially update the deployment section of an agent
+- [Create Dispatch](https://docs.vaanivoice.ai/api-reference/trigger-call.md): Trigger an outbound telephony call or an in-browser WebRTC session
+- [Get Call History](https://docs.vaanivoice.ai/api-reference/call-history.md): Get call history for a client
+- [Get Transcript](https://docs.vaanivoice.ai/api-reference/transcript.md): Retrieve the transcript for a call
+- [Stream Audio](https://docs.vaanivoice.ai/api-reference/stream.md): Stream the audio recording of a call
+- [Get Call Details](https://docs.vaanivoice.ai/api-reference/call-details.md): Get detailed call information including transcript, entities, and evaluation
+
+## OpenAPI Specs
+
+- [openapi](/api-reference/openapi.json)
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.
