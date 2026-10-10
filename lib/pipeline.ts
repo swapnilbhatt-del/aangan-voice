@@ -97,11 +97,21 @@ async function run(p: PostCall, callId: number) {
   // 4. Caller (PII table) and enquiry, with dropped-call merge and repeat-caller detection.
   const name = verdict.fields.caller_first_name ?? str(ents.caller_name);
   const email = str(ents.email)?.toLowerCase().replace(/\s+at\s+/g, "@").replace(/\s+dot\s+/g, ".").replace(/\s/g, "") ?? null;
-  const callerId = await upsertCaller(phone, name, email && /^[^@]+@[^@]+\.[a-z]{2,}$/.test(email) ? email : null);
+  const validEmail = email && /^[^@]+@[^@]+\.[a-z]{2,}$/.test(email) ? email : null;
 
-  // A re-run keeps the call's existing enquiry.
-  const [own] = await sql<{ enquiry_id: number | null }[]>`select enquiry_id from calls where id = ${callId}`;
+  // A re-run keeps the call's existing enquiry and caller, so it never creates duplicates
+  // (a caller without a phone number can't be matched any other way).
+  const [own] = await sql<{ enquiry_id: number | null; caller_id: number | null }[]>`
+    select c.enquiry_id, e.caller_id from calls c left join enquiries e on e.id = c.enquiry_id where c.id = ${callId}`;
   let enquiryId: number | null = own?.enquiry_id ?? null;
+  let callerId: number | null = own?.caller_id ?? null;
+  if (callerId) {
+    await sql`update callers set name = coalesce(${name}, name), email = coalesce(${validEmail}, email),
+              phone = coalesce(phone, (select ${phone}::text where not exists (select 1 from callers where phone = ${phone})))
+              where id = ${callerId}`;
+  } else {
+    callerId = await upsertCaller(phone, name, validEmail);
+  }
   let priority: string | null = verdict.flags.includes("vip_referral") ? "vip_referral" : null;
   if (callerId && !enquiryId) {
     const prior = await sql<{ id: number; status: string; claimed_at: Date | null; minutes_ago: number }[]>`

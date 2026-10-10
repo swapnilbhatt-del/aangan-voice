@@ -41,7 +41,9 @@ async function main() {
     await sql`delete from events where call_id = any(${ids.map((r) => r.id)}) or enquiry_id = any(${enq})`;
     await sql`delete from calls where vaani_call_id like 'sim-%'`;
     await sql`delete from enquiries e where e.id = any(${enq}) and not exists (select 1 from calls c where c.enquiry_id = e.id)`;
-    await sql`delete from webhook_log where call_id like 'sim-%'`;
+    await sql`delete from webhook_log where call_id like 'sim-%' or event = 'setup_ping'`;
+    // Callers left with no enquiry at all are test leftovers.
+    await sql`delete from callers c where not exists (select 1 from enquiries e where e.caller_id = c.id)`;
     console.log(`Removed ${ids.length} simulated calls.`);
     await sql.end();
     return;
