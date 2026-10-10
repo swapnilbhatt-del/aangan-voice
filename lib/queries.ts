@@ -46,7 +46,7 @@ export async function getStats() {
     {
       calls: number; after_hours: number; qualified: number; declined: number; nurture: number; complaint: number;
       non_enquiry: number; needs_review: number; price_leaks: number; vaani_cost: number; llm_cost: number;
-      email_cost: number; costed_calls: number; avg_duration: number | null;
+      email_cost: number; costed_calls: number; estimated_calls: number; avg_duration: number | null;
     }[]
   >`
     select count(*)::int as calls,
@@ -62,6 +62,7 @@ export async function getStats() {
            coalesce(sum(llm_cost_inr), 0)::float as llm_cost,
            coalesce(sum(email_cost_inr), 0)::float as email_cost,
            count(*) filter (where vaani_cost_inr is not null)::int as costed_calls,
+           count(*) filter (where 'cost_estimated' = any(flags))::int as estimated_calls,
            avg(duration_s)::float as avg_duration
     from calls where coalesce(started_at, created_at) >= date_trunc('month', now() at time zone 'Asia/Kolkata')`;
 

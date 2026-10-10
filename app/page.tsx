@@ -120,7 +120,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               </tbody>
             </table>
             <p className="small muted" style={{ marginBottom: 0 }}>
-              Vaani cost is read per call from Vaani's call history ({t.costed_calls}/{t.calls} calls costed). Model cost is computed from the tokens each verdict used.
+              Vaani cost comes from Vaani's call history when it's available; otherwise it's the call's duration × Vaani's per-minute rate ({t.estimated_calls} of {t.calls} calls estimated this way). Model cost is computed from the tokens each verdict used.
             </p>
           </div>
         </div>
